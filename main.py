@@ -22,8 +22,11 @@ if __name__ == '__main__':
     #print("Image [0,0,:]=",image[0,0,:])
     
     # Convolve weight matrxit
-    activation_1 = testConv2D.conv2d(image,weight1)
-    activation_2 = testConv2D.conv2d(image,weight2)
-    print("Acitvation Shape=",activation_1.shape)
-    #summed_act = np.sum(conv_activation,axis=2)
-    #print("Summed Acitvation Shape=",summed_act.shape)
+    activation_1_1 = testConv2D.conv2d(image,weight1)
+    activation_1_2 = testConv2D.conv2d(image,weight2)
+    print("Acitvation Shape=",activation_1_1.shape)
+    
+    #We need to layer the activations into a new image
+
+    activation_1  = np.stack([activation_1_1,activation_1_2],axis=2)
+    print("Acitvation Shape after layer 1=",activation_1.shape)

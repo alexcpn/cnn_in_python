@@ -4,12 +4,13 @@ from numpy.lib.type_check import imag
 import cnn
 import numpy as np
 
+
 class TestConv2D(unittest.TestCase):
 
     def test_conv2d(self):
         testConv2D = cnn.Conv2D()
         filter_size = 2       
-        weight1 =  np.ones((filter_size,filter_size)) 
+        weight1 =  np.ones((filter_size,filter_size,3)) 
         image = np.arange(16).reshape(4, 4)
         print("Intial Image=",image)
         image = np.stack([image,image,image], axis=2) # to mimick RGB channel
@@ -18,8 +19,8 @@ class TestConv2D(unittest.TestCase):
         print("Image [0,0,:]=",image[0,0,:])
         conv_activation= testConv2D.conv2d(image,weight1)
         print("Final Acitvation Shape=",conv_activation.shape)
-        summed_act = np.sum(conv_activation,axis=2)
-        print("Summed Acitvation Shape=",summed_act.shape)
+        print("Final Acitvation =",conv_activation)
+
 
 
 
