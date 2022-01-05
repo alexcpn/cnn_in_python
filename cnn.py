@@ -40,5 +40,5 @@ class Conv2D:
                     #print("Inner Ouput \n interim_ouput[{},{},{}]={}\n".format(
                     #    di, dj, dk, interim_ouput[di, dj, dk]))
                 #print("Intermin Ouput \n {}\n".format(interim_ouput))
-        print("Ouput of Convolution=", interim_ouput.shape)
+        #print("Ouput of Convolution=", interim_ouput.shape)
         return interim_ouput
