@@ -12,6 +12,16 @@ def relu(z):
 def relu_derivative(z):
     return np.greater(z, 0).astype(int)
 
+def intializeWeights(number_of_filters,filter_size,depth):
+    """Intialize the weight's/filters of Layer
+    :return: list of weights
+    """
+    weight_layer = []
+    for i in range(number_of_filters):
+        weight =  np.random.rand(filter_size,filter_size,depth) 
+        weight_layer.append(weight)
+    return weight_layer
+
 def layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1):
     """This function intializes the random weights as per the specified filter
     size and number and does the Convolution with the filter and then applies the
@@ -45,14 +55,30 @@ if __name__ == '__main__':
 
     # The class containing the convolution Logic
     testConv2D = cnn.Conv2D()
+
+    # we will create leNet without the Pooling parts
+    # (stride is always 1 for now)
+    #  [32.32.3] *(5.5.3)*6  == [28.28.6] * (5.5.6)*1 = [24.24.1] *  (5.5.3)*16 = [20.20.16] * FC layer
+    
+    # For layer 1
     filter_size = 5  
     number_of_filters = 6
-    weight_layer1 = []
     # Intialize the weight's/filters of Layer1
-    for i in range(number_of_filters):
-        weight =  np.random.rand(filter_size,filter_size,image.shape[2]) 
-        weight_layer1.append(weight)
-        
+    weight_layer1 = intializeWeights(number_of_filters,filter_size,image.shape[2])
     output_layer1 = layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1)
 
-    
+     # For layer 2
+    filter_size = 5  
+    number_of_filters = 1
+    # Intialize the weight's/filters of Layer1
+    weight_layer2 =  intializeWeights(number_of_filters,filter_size,output_layer1.shape[2])
+    # Do convolution and activation
+    output_layer2 = layerConvolutionActivation(output_layer1, filter_size,number_of_filters,weight_layer2)
+
+    # For layer 3
+    filter_size = 5  
+    number_of_filters = 16
+    # Intialize the weight's/filters of Layer1
+    weight_layer3 =  intializeWeights(number_of_filters,filter_size,output_layer2.shape[2])
+    # Do convolution and activation
+    output_layer3 = layerConvolutionActivation(output_layer2, filter_size,number_of_filters,weight_layer3)
