@@ -12,6 +12,27 @@ def relu(z):
 def relu_derivative(z):
     return np.greater(z, 0).astype(int)
 
+def layerConvolutionActivation(image, filter_size,no_of_filters):
+    weight_layer1 = []
+    # Intialize the weight's/filters of Layer1
+    for i in range(number_of_filters):
+        weight =  np.random.rand(filter_size,filter_size,image.shape[2]) 
+        weight_layer1.append(weight)
+
+    convolution_list_1 = []
+    for weight in weight_layer1:
+        conv = testConv2D.conv2d(image,weight) 
+        convolution_list_1.append(conv) 
+    
+    # We need to stack the convolutions together
+    conv_1_stack  = np.stack(convolution_list_1,axis=2)
+    print("Convolution Shape after layer 1=",conv_1_stack.shape)
+
+    # Apply activation to layer 1 output
+    output_layer2 = util.ReLU(conv_1_stack)
+    print("Acitvation Shape after layer 1=",output_layer2.shape)
+    return weight_layer1 ,output_layer2
+
 if __name__ == '__main__':
 
     # Generate a random imaage
@@ -27,22 +48,6 @@ if __name__ == '__main__':
     testConv2D = cnn.Conv2D()
     filter_size = 5  
     number_of_filters = 6
-    weight_layer1 = []
+    weight_layer1 ,output_layer2 = layerConvolutionActivation(image, filter_size,number_of_filters)
 
-    # Intialize the weight's/filters of Layer1
-    for i in range(number_of_filters):
-        weight =  np.random.rand(filter_size,filter_size,image_depth) 
-        weight_layer1.append(weight)
-
-    convolution_list_1 = []
-    for weight in weight_layer1:
-        conv = testConv2D.conv2d(image,weight) 
-        convolution_list_1.append(conv) 
     
-    # We need to stack the convolutions together
-    conv_1_stack  = np.stack(convolution_list_1,axis=2)
-    print("Convolution Shape after layer 1=",conv_1_stack.shape)
-
-    # Apply activation to layer 1 output
-    input_layer2 = util.ReLU(conv_1_stack)
-    print("Acitvation Shape after layer 1=",input_layer2.shape)
