@@ -31,7 +31,8 @@ class Conv2D:
                 dj += 1
                 if (m+fi) <= i and (fi+n) <= j:
                     # print(m,':',n,':',o,"\n------------\n",image[m:fl+m,n:fl+n].shape)
-                    # temp = np.dot(image[m:fl+m,n:fl+n,o],filter) # this is wrong
+                    # temp = np.dot(image[m:fl+m,n:fl+n,o],filter) # this is wrong - we 
+                    # need to unravel the selected box part first, to do dot product with weights
                     #  https://stats.stackexchange.com/a/335500/191675
                     temp = np.dot(
                         image[m:fi+m, n:fi+n].ravel(), filter.ravel())
