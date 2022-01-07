@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     # we will create leNet without the Pooling parts
     # (stride is always 1 for now)
-    #  [32.32.3] *(5.5.3)*6  == [28.28.6] * (5.5.6)*1 = [24.24.1] *  (5.5.3)*16 = [20.20.16] * FC layer
+    #  [32.32.3] *(5.5.3)*6  == [28.28.6] * (5.5.6)*1 = [24.24.1] *  (5.5.3)*16 = [20.20.16] * FC layer 
     
     # For layer 1
     filter_size = 5  
@@ -76,9 +76,40 @@ if __name__ == '__main__':
     output_layer2 = layerConvolutionActivation(output_layer1, filter_size,number_of_filters,weight_layer2)
 
     # For layer 3
+    # Out=W−F+1 imagesize - filtersize + 1
     filter_size = 5  
     number_of_filters = 16
     # Intialize the weight's/filters of Layer1
     weight_layer3 =  intializeWeights(number_of_filters,filter_size,output_layer2.shape[2])
     # Do convolution and activation
     output_layer3 = layerConvolutionActivation(output_layer2, filter_size,number_of_filters,weight_layer3)
+    print("output_layer3shape =", output_layer3.shape) # output_layer3 shape = (20, 20, 16)
+        
+    # Lets add the fully connected layer say 120 - we need the shape to be compatible - for that we are adding the
+    # the dimension of the above layer 
+    # Note that I don't want to flatten here!
+
+    weight_layer4 =  np.random.rand(output_layer3.shape[0],120,output_layer3.shape[2]) 
+    print("Fully Connected Weight4 shape =", weight_layer4.shape) # (20, 120, 16)
+    # this time there is no convolution - rather we need to do a dot
+    output_layer4 = np.einsum('ijp,jkp->ik', output_layer3, weight_layer4) # (20, 120)
+    #output_layer4 = np.tensordot(output_layer3,weight_layer4,axes=2)
+    output_layer4 = util.ReLU(output_layer4)
+    print("Fully Connected Layer 1 Ouput shape =", output_layer4.shape)
+
+    weight_layer5 =  np.random.rand(output_layer4.shape[1],1) 
+    print("Fully Connected Weight5 shape =", weight_layer5.shape) # (20, 120, 16)
+    # this time there is no convolution - rather we need to do a dot
+    output_layer5 = np.einsum('ij,jk->ik', output_layer4, weight_layer5) # (20, 120)
+    output_layer5 = util.ReLU(output_layer5)
+    print("Fully Connected Layer 2 Ouput shape =", output_layer5.shape)
+
+    # final layer lets make it 10 classes
+    weight_layer6 =  np.random.rand(output_layer5.shape[0],10) 
+    print("Fully Connected Weight6 shape =", weight_layer6.shape) # (20, 120, 16)
+    # this time there is no convolution - rather we need to do a dot
+    output_layer6 = np.einsum('ij,ik->jk', output_layer5, weight_layer6) #  20,1*20,10 (1, 10)
+    print("Final  Ouput shape =", output_layer6.shape)
+    # Run softmax
+    print("Final  Ouput  =", util.softmax(output_layer6))
+
