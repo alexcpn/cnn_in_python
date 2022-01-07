@@ -1,5 +1,9 @@
-
+""" Utility functions
+"""
 import numpy as np
+
+__author__ = "Alex Punnen"
+__status__ = "Test"
 
 def ReLU(x):
     return x * (x > 0)

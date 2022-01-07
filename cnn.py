@@ -1,8 +1,11 @@
-
+"""
+ The module that does the Convolution Operation
+"""
 import numpy as np
 from numpy.lib.type_check import imag
 
-
+__author__ = "Alex Punnen"
+__status__ = "Test"
 class Conv2D:
     def __init__(self):
         pass

@@ -1,10 +1,13 @@
+""" Test module for Convolution Operation
+"""
 import unittest
 
 from numpy.lib.type_check import imag
 import cnn
 import numpy as np
 
-
+__author__ = "Alex Punnen"
+__status__ = "Test"
 class TestConv2D(unittest.TestCase):
 
     def test_conv2d(self):

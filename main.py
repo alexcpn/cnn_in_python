@@ -1,8 +1,12 @@
+"""Main module
+"""
 from numpy.core.fromnumeric import shape
 import cnn
 import util as util
 import numpy as np
 
+__author__ = "Alex Punnen"
+__status__ = "Test"
 
 def relu(z):
     '''Relu activation function'''
