@@ -27,8 +27,7 @@ def intializeWeights(number_of_filters,filter_size,depth):
     return weight_layer
 
 def layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1):
-    """This function intializes the random weights as per the specified filter
-    size and number and does the Convolution with the filter and then applies the
+    """This function  does the Convolution with the filter and then applies the
     activation function to the convolution 
     :return: the output layer after applyigng the Activation
     """
@@ -39,23 +38,23 @@ def layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer
     
     # We need to stack the convolutions together
     conv_1_stack  = np.stack(convolution_list_1,axis=2)
-    print("Convolution Shape after layer 1=",conv_1_stack.shape)
+    print("Convolution Shape =",conv_1_stack.shape)
 
     # Apply activation to layer 1 output
     output_layer2 = util.ReLU(conv_1_stack)
-    print("Acitvation Shape after layer 1=",output_layer2.shape)
+    #print("Acitvation Shape after layer 1=",output_layer2.shape)
     return output_layer2
 
 if __name__ == '__main__':
-
+    np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
     # Generate a random imaage
     image_size = 32 
     image_depth = 3
-    image = np.arange(image_size*image_size).reshape(image_size, image_size)
+    image = np.random.rand(image_size, image_size)
     # to mimick RGB channel
     image = np.stack([image,image,image], axis=image_depth-1) # 0 to 2
     print("Image Shape=",image.shape)
-    #print("Image [0,0,:]=",image[0,0,:])
+    print("Image [0,0,:]=",image[0,1,2])
 
     # The class containing the convolution Logic
     testConv2D = cnn.Conv2D()
@@ -70,6 +69,7 @@ if __name__ == '__main__':
     # Intialize the weight's/filters of Layer1
     weight_layer1 = intializeWeights(number_of_filters,filter_size,image.shape[2])
     output_layer1 = layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1)
+    print("val output_layer1= ",output_layer1[0,0,0])
 
      # For layer 2
     filter_size = 5  
@@ -78,6 +78,7 @@ if __name__ == '__main__':
     weight_layer2 =  intializeWeights(number_of_filters,filter_size,output_layer1.shape[2])
     # Do convolution and activation
     output_layer2 = layerConvolutionActivation(output_layer1, filter_size,number_of_filters,weight_layer2)
+    print("val output_layer2= ",output_layer2[0,0,0])
 
     # For layer 3
     # Out=W−F+1 imagesize - filtersize + 1
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     weight_layer3 =  intializeWeights(number_of_filters,filter_size,output_layer2.shape[2])
     # Do convolution and activation
     output_layer3 = layerConvolutionActivation(output_layer2, filter_size,number_of_filters,weight_layer3)
-    print("output_layer3shape =", output_layer3.shape) # output_layer3 shape = (20, 20, 16)
+    print("Output_layer 3 shape =", output_layer3.shape) # output_layer3 shape = (20, 20, 16)
         
     # Lets add the fully connected layer say 120 - we need the shape to be compatible - for that we are adding the
     # the dimension of the above layer 
@@ -98,22 +99,38 @@ if __name__ == '__main__':
     # this time there is no convolution - rather we need to do a dot
     output_layer4 = np.einsum('ijp,jkp->ik', output_layer3, weight_layer4) # (20, 120)
     #output_layer4 = np.tensordot(output_layer3,weight_layer4,axes=2)
-    output_layer4 = util.ReLU(output_layer4)
-    print("Fully Connected Layer 1 Ouput shape =", output_layer4.shape)
+    output_layer4 = util.sigmoid(output_layer4)
+    print("Fully Connected Layer 1 Ouput shape =", output_layer4.shape,\
+         "sample val 0,0,0",output_layer4[0,0])
 
     weight_layer5 =  np.random.rand(output_layer4.shape[1],1) 
     print("Fully Connected Weight5 shape =", weight_layer5.shape) # (20, 120, 16)
     # this time there is no convolution - rather we need to do a dot
     output_layer5 = np.einsum('ij,jk->ik', output_layer4, weight_layer5) # (20, 120)
-    output_layer5 = util.ReLU(output_layer5)
+    output_layer5 = util.sigmoid(output_layer5)
     print("Fully Connected Layer 2 Ouput shape =", output_layer5.shape)
 
     # final layer lets make it 10 classes
     weight_layer6 =  np.random.rand(output_layer5.shape[0],10) 
     print("Fully Connected Weight6 shape =", weight_layer6.shape) # (20, 120, 16)
     # this time there is no convolution - rather we need to do a dot
-    output_layer6 = np.einsum('ij,ik->jk', output_layer5, weight_layer6) #  20,1*20,10 (1, 10)
+    output_layer6 = np.einsum('ij,ik->jk', output_layer5, weight_layer6).flatten() #  20,1*20,10 (1, 10)
     print("Final  Ouput shape =", output_layer6.shape)
+    print("Final  Ouput  =", output_layer6)
     # Run softmax
-    print("Final  Ouput  =", util.softmax(output_layer6))
+    softmax_ouput =util.softmax(output_layer6)
+    print("Softmax  Ouput  =", softmax_ouput)
 
+     # Assume that the truth was class 1 , for this particular "image"
+    y = np.array([1., 0., 0., 0., 0. ,0., 0. ,0 ,0., 0.])
+    print(y.shape,y)
+
+    # Calculate the difference between actual class and the calculated one
+    delta2 = softmax_ouput - y
+
+    #Plug this into the cost function lets take the CrossEntropy Loss as this a classificaiton
+    # See this https://www.youtube.com/watch?v=dEXPMQXoiLc 
+    # Get index 
+    crossEntropyLoss =-np.log(softmax_ouput[np.argmax(y)])
+    print("crossEntropyLoss  = ",    crossEntropyLoss =-np.log(softmax_ouput[np.argmax(y)])
+)

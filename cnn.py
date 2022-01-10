@@ -13,7 +13,7 @@ class Conv2D:
     def conv2d(self, image, filter):
         imagesize = image.shape
         filter_size = filter.shape
-        print(imagesize)
+        #print(imagesize)
         i = imagesize[0]
         j = imagesize[1]
         k = imagesize[2]
@@ -21,7 +21,7 @@ class Conv2D:
         fj = filter_size[1] 
         fk = filter_size[2] 
 
-        print("Image (i,j,k)=", i, j, k, "Filter (i,j,k)=", fi,fj,fk)
+        #print("Image (i,j,k)=", i, j, k, "Filter (i,j,k)=", fi,fj,fk)
         di = -1
         # Out=W−F+1 https://stats.stackexchange.com/a/323423/191675
         convolution_size = i-fi+1
