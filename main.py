@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # Intialize the weight's/filters of Layer1
     weight_layer1 = intializeWeights(number_of_filters,filter_size,image.shape[2])
     output_layer1 = layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1)
-    print("val output_layer1= ",output_layer1[0,0,0])
+    #print("val output_layer1= ",output_layer1[0,0,0])
 
      # For layer 2
     filter_size = 5  
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     weight_layer2 =  intializeWeights(number_of_filters,filter_size,output_layer1.shape[2])
     # Do convolution and activation
     output_layer2 = layerConvolutionActivation(output_layer1, filter_size,number_of_filters,weight_layer2)
-    print("val output_layer2= ",output_layer2[0,0,0])
+    #print("val output_layer2= ",output_layer2[0,0,0])
 
     # For layer 3
     # Out=W−F+1 imagesize - filtersize + 1
@@ -90,18 +90,17 @@ if __name__ == '__main__':
     output_layer3 = layerConvolutionActivation(output_layer2, filter_size,number_of_filters,weight_layer3)
     print("Output_layer 3 shape =", output_layer3.shape) # output_layer3 shape = (20, 20, 16)
         
-    # Lets add the fully connected layer say 120 - we need the shape to be compatible - for that we are adding the
-    # the dimension of the above layer 
-    # Note that I don't want to flatten here!
-
+    """ 
+    Lets add the fully connected layer say 120 - we need the shape to be compatible - for that we are adding the
+    the dimension of the above layer 
+    """
     weight_layer4 =  np.random.rand(output_layer3.shape[0],120,output_layer3.shape[2]) 
     print("Fully Connected Weight4 shape =", weight_layer4.shape) # (20, 120, 16)
     # this time there is no convolution - rather we need to do a dot
     output_layer4 = np.einsum('ijp,jkp->ik', output_layer3, weight_layer4) # (20, 120)
     #output_layer4 = np.tensordot(output_layer3,weight_layer4,axes=2)
     output_layer4 = util.sigmoid(output_layer4)
-    print("Fully Connected Layer 1 Ouput shape =", output_layer4.shape,\
-         "sample val 0,0,0",output_layer4[0,0])
+    print("Fully Connected Layer 1 Ouput shape =", output_layer4.shape)
 
     weight_layer5 =  np.random.rand(output_layer4.shape[1],1) 
     print("Fully Connected Weight5 shape =", weight_layer5.shape) # (20, 120, 16)
@@ -110,27 +109,43 @@ if __name__ == '__main__':
     output_layer5 = util.sigmoid(output_layer5)
     print("Fully Connected Layer 2 Ouput shape =", output_layer5.shape)
 
+    
     # final layer lets make it 10 classes
     weight_layer6 =  np.random.rand(output_layer5.shape[0],10) 
     print("Fully Connected Weight6 shape =", weight_layer6.shape) # (20, 120, 16)
     # this time there is no convolution - rather we need to do a dot
     output_layer6 = np.einsum('ij,ik->jk', output_layer5, weight_layer6).flatten() #  20,1*20,10 (1, 10)
     print("Final  Ouput shape =", output_layer6.shape)
-    print("Final  Ouput  =", output_layer6)
-    # Run softmax
+    #print("Final  Ouput  =", output_layer6)
+    
+    """
+    Run Softmax
+    """
     softmax_ouput =util.softmax(output_layer6)
     print("Softmax  Ouput  =", softmax_ouput)
 
      # Assume that the truth was class 1 , for this particular "image"
-    y = np.array([1., 0., 0., 0., 0. ,0., 0. ,0 ,0., 0.])
-    print(y.shape,y)
-
-    # Calculate the difference between actual class and the calculated one
-    delta2 = softmax_ouput - y
-
+    target = np.array([1., 0., 0., 0., 0. ,0., 0. ,0 ,0., 0.])
+     
     #Plug this into the cost function lets take the CrossEntropy Loss as this a classificaiton
-    # See this https://www.youtube.com/watch?v=dEXPMQXoiLc 
-    # Get index 
-    crossEntropyLoss =-np.log(softmax_ouput[np.argmax(y)])
-    print("crossEntropyLoss  = ",    crossEntropyLoss =-np.log(softmax_ouput[np.argmax(y)])
-)
+    # See this https://www.youtube.com/watch?v=dEXPMQXoiLc  
+    # Get index of the true calss
+    E_crossEntropyLoss =-np.log(softmax_ouput[np.argmax(target)])
+    print("crossEntropyLoss  = ",E_crossEntropyLoss)
+
+    """
+    BackPropogate the Loss
+    """
+
+
+    lr = 1 # learning rate
+    # https://www.ics.uci.edu/~pjsadows/notes.pdf
+    # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
+    Sj = softmax_ouput
+    DjSi = Si(dij-Sj) #dij = 1 if i == j; else 0
+
+    dE_by_dW6 = (softmax_ouput-target)*output_layer6
+    weight_layer6 = weight_layer6 - lr*dE_by_dW6
+    t =(output_layer4*(1-output_layer4))
+    print(t.shape)
+    dE_by_dW5 = (softmax_ouput-target)*weight_layer5
