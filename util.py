@@ -1,5 +1,7 @@
 """ Utility functions
 """
+from pickletools import TAKEN_FROM_ARGUMENT1
+import tarfile
 import numpy as np
 
 __author__ = "Alex Punnen"
@@ -29,13 +31,15 @@ def softmax(x):
     return e_x / e_x.sum()
 
 
-def derv_softmax(s): # where x is the input
+def derv_softmax_wrto_logits(s): # derivative wrto x (logits) ; where s is softmax of x th input
     """
-    x is input vector of shape 1* N
-    and x is the softmax vector of x with same shape as x
-    Derivative of softmax is a Jacobian matrix of size N^2
+    Logits are activation from final layer - usually sigmoid layer (logistic function) and fed to softmax
+    x is input vector of shape 1* N ; and is the product of Weights of previous layer * Input (or ouptut from previous layer)
+    and s is the softmax vector of x with same shape as x
+    Derivative of softmax wrto x is a Jacobian matrix of size N^2
     we have to take derivative of softmax for each input x = 1 to N
-    And since softmax is a vector we need to take derivative of each element in vector  1 tto N
+    And since softmax is a vector we need to take derivative of each element in vector  1 to N 
+    This is why the Jacobian is N^2 
     
     Assuming s.shape == x.shape (3) then the Jacobian (Jik) of the derivative is given below (shape is np.diag(s))
 
@@ -60,8 +64,27 @@ def derv_softmax(s): # where x is the input
             Jik[k][i] = s[k]* (kronecker_ik -s[i]) 
     return Jik
 
+def crossentropyloss(softmax_vector,target_vector):
+    """
+    (1) https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
+    For (1) two discrete probability distributions Y and P, the cross-entropy function is defined as:
+     xent(Y,K)=  -Sigma_k Y(k)log(P(k)) ( k is element of 1 to T) T being number of classes
+     where Y is the correct classificaiton vector/ target vector ; which means Y(k) = 1 only on one element of k say y
+     which means the for all other cases Y(k) = 0 and we can wirte as
+     xent(Y,K)= - log(P(y)) 
+    """
+    return -1 * np.log(softmax_vector[np.argmax(target_vector)])
 
+def derv_crossentropyloss_wrto_logits(logits, target):
+    """
+    From https://charlee.li/how-to-compute-the-derivative-of-softmax-and-cross-entropy/
+    (Error at input to softmax layer)
+    Note that we need the derivative of Cross Entropy Loss wrto the Weights. This is an intermediate layer
+    """
+    return softmax(logits)- target
 
+def derv_crossentropyloss_wrto_weightL(activation_l, target):
+    return (activation_l -target)
 
 if __name__ == '__main__':
     k = np.random.randint(-2,5, size=(2, 4))
@@ -86,7 +109,7 @@ if __name__ == '__main__':
     print("x =",x)
     s = softmax(x)
     print("softmax",s)
-    Jik = derv_softmax(s)
+    Jik = derv_softmax_wrto_logits(s)
     print("Derivative of softmax Jacobian is ",Jik)
   
     
