@@ -15,14 +15,14 @@ class TestConv2D(unittest.TestCase):
         filter_size = 2       
         weight1 =  np.ones((filter_size,filter_size,3)) 
         image = np.arange(16).reshape(4, 4)
-        print("Intial Image=",image)
-        image = np.stack([image,image,image], axis=2) # to mimick RGB channel
+        print("Initial Image=",image)
+        image = np.stack([image,image,image], axis=2) # to mimic RGB channel
         print("Image Shape=",image.shape)
         print("Image [0,0,0]=",image[0,0,0],"[1,0,1]=",image[1,0,1],"[2,0,2]=",image[2,0,2])
         print("Image [0,0,:]=",image[0,0,:])
         conv_activation= testConv2D.conv2d(image,weight1)
-        print("Final Acitvation Shape=",conv_activation.shape)
-        print("Final Acitvation =",conv_activation)
+        print("Final Activation Shape=",conv_activation.shape)
+        print("Final Activation =",conv_activation)
 
 
 

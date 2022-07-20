@@ -3,7 +3,7 @@ Use no libraries other than for data loading and image manipulation
 
 DataSet - https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz
 
-Terminal Ouput
+Terminal Output
 
 ```
 python3 main.py

@@ -19,7 +19,7 @@ def sigmoid(x):
 
 # let us add a method that takes the derivative of x as well
 def derv_sigmoid(x):
-   return sigmoid(x)*(1-sigmoid(x))
+   return sigmoid(x) *(1-sigmoid(x))
 
 # softmax numercially stable
 
@@ -56,6 +56,10 @@ def derv_softmax_wrto_logits(s): # derivative wrto x (logits) ; where s is softm
     (2) https://e2eml.school/softmax.html
     (3) https://stackoverflow.com/a/46028029/429476
     """
+    print(s.ndim)
+    if s.ndim != 1:
+        print("Jacobian of Vector over Matrix!!")
+        return
     N = len(s)
     Jik =  np.zeros(shape=(N,N))
     for k in range(0, N):
@@ -69,8 +73,8 @@ def crossentropyloss(softmax_vector,target_vector):
     (1) https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
     For (1) two discrete probability distributions Y and P, the cross-entropy function is defined as:
      xent(Y,K)=  -Sigma_k Y(k)log(P(k)) ( k is element of 1 to T) T being number of classes
-     where Y is the correct classificaiton vector/ target vector ; which means Y(k) = 1 only on one element of k say y
-     which means the for all other cases Y(k) = 0 and we can wirte as
+     where Y is the correct classification vector/ target vector ; which means Y(k) = 1 only on one element of k say y
+     which means the for all other cases Y(k) = 0 and we can write as
      xent(Y,K)= - log(P(y)) 
     """
     return -1 * np.log(softmax_vector[np.argmax(target_vector)])
@@ -88,6 +92,7 @@ def derv_crossentropyloss_wrto_weightL(activation_l, target):
 
 if __name__ == '__main__':
     k = np.random.randint(-2,5, size=(2, 4))
+    np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
     print(k)
     print(ReLU(k))
     print(dReLU(k))
@@ -105,12 +110,22 @@ if __name__ == '__main__':
     print(sfm,np.sum(sfm,axis=0))
     print("sfm",softmax(x))
     print("------------------------------------------")
-    x = np.array([1,2])
+    x = np.array([1,2,3,4])
     print("x =",x)
     s = softmax(x)
     print("softmax",s)
     Jik = derv_softmax_wrto_logits(s)
     print("Derivative of softmax Jacobian is ",Jik)
+    y = np.array([[1,2,3,4],
+                  [5,6,7,8],
+                  [9,10,11,12]])
+    ds = derv_sigmoid(y)
+    print("Derivative of Sigmoid is", ds.shape[0] )
+    J =derv_softmax_wrto_logits(ds)
+
+    print("Jacobian of Sigmoid is",J )
+    #print('\n'.join([''.join(['{:2}'.format(item) for item in row]) 
+    #  for row in J]))
   
     
 
