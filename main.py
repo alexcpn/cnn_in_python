@@ -111,9 +111,7 @@ if __name__ == '__main__':
     print("z5.shape =", z5.shape)
     a5 = util.sigmoid(z5)
     print("a5.shape =", a5.shape)
-    a5_derv = util.derv_sigmoid(z5)
-    print("a5_derv.shape =", a5_derv.shape)
-
+    
     # final layer lets make it 10 classes
     w6 =  np.random.rand(a5.shape[0],10) 
     print("w6.shape =", w6.shape) # (20, 120, 16)
@@ -147,37 +145,29 @@ if __name__ == '__main__':
 
     lr = 1 # learning rate
     # https://alexcpn.github.io/html/NN/ml/7_backpropogation_full/
-
-    # https://e2eml.school/softmax.html
-    # https://stats.stackexchange.com/a/564725/191675
-    # https://bfeba431-a-62cb3a1a-s-sites.googlegroups.com/site/deeplearningcvpr2014/ranzato_cvpr2014_DLtutorial.pdf?attachauth=ANoY7cqPhkgQyNhJ9E7rmSk-RTdMYSYqpfJU2gPlb9cWH_4a1MbiYPq_0ihyuolPiYDkImyr9PmA-QwSuS8F3OMChiF97XTDD_luJqam70GvAC4X6G6KlU2r7Pv1rqkHaMbmXpdtXJHAveR_jWf1my_IojxFact87u2-1YXtfJIwYkhBwhMsYagICk-P6X9ktA0Pyjd601tboSlX_UGftX1vB57-tS6bdAkukhmSRLU-ZiF4RdJ_sI3YAGaaPYj1KLWFpkFa_-XG&attredirects=1
-    # https://cs.nyu.edu/~yann/talks/lecun-ranzato-icml2013.pdf
     D_S_by_z = util.derv_softmax_wrto_logits(softmax_ouput)
     D_L_by_z = util.derv_crossentropyloss_wrto_logits(softmax_ouput,target)
-
     # For the last layers  W= 6
     # EqA1 in https://alexcpn.github.io/html/NN/ml/7_backpropogation_full/
     activation_L =  softmax_ouput
-    B0 = (activation_L -target)
-    print("B0.shape =", B0.shape)
-    D_L_by_w6 = B0 *a5
-    print("BP 6: Last weight update - D_L_by_w6 shape==w6 shape",D_L_by_w6.shape,w6.shape)
+    DL_by_z6 = (activation_L -target)
+    print("DL_by_z6.shape =", DL_by_z6.shape)
+    D_L_by_w6 = DL_by_z6 *a5
+    print("BP 6: Last weight update - D_L_by_w6 shape == w6 shape",D_L_by_w6.shape,w6.shape)
     w6 = w6 - lr*D_L_by_w6
     
 
     print("-----------------------------------")
     # For the inner layers  W= 5
     # EqA2 in https://alexcpn.github.io/html/NN/ml/7_backpropogation_full/
-    B0 = np.expand_dims(B0, axis=1)
-    print("B0 shape",B0.shape)
-    B1 = w6 @ B0  # s@ is np.matmul (almost similar to np.dot -https://stackoverflow.com/a/34142617/429476 )
-    print("B1 shape",B1.shape)
-    print("a5_derv shape",a5_derv.shape)
-    B1 = B1 * a5_derv #  Hadamard product/element wise multiplication here (20, 1) * (20, 1)
-    print("B1 shape",B1.shape) # (20, 1)
-    D_L_by_w5 =   a4.T @ B1
-    print("D_L_by_w5 shape",D_L_by_w5.shape)
-    
+    a5_derv = util.derv_sigmoid(z5)
+    #DL_by_z6 = np.expand_dims(DL_by_z6, axis=1)
+    DL_by_z5 = DL_by_z6 @ w6.T  # @ is np.matmul (almost similar to np.dot -https://stackoverflow.com/a/34142617/429476 )
+    DL_by_z5 = DL_by_z5 * a5_derv #  Hadamard product/element wise multiplication here (20, 1) * (20, 1)
+    print("DL_by_z5 shape",DL_by_z5.shape) # (20, 1)
+    D_L_by_w5 =   a4.T @ DL_by_z5
+    print("D_L_by_w5 shape == w5 Shape",D_L_by_w5.shape,w5.shape)
+   
     # Using gradient descent to update the weights
     print("BP 5: Last weight update")
     w5 = w5 - lr*D_L_by_w5
@@ -185,12 +175,23 @@ if __name__ == '__main__':
    
     print("-----------------------------------")
     # For the inner layers  W= 4
-    y = np.expand_dims(B1, axis=1)
-    print("y shape",y.shape,  w5.T.shape)
-    D_I_by_wI_2 = y @ w5.T # TODO - USe the weights before adjustment in above step
-    print("D_I_by_wI_2 shape",D_I_by_wI_2.shape)
-    #D_I_by_wI_3 = a3 @ D_I_by_wI_2
-    D_L_by_w3=np.einsum('ijp,jkp->ikp', a3, w4) 
-    print("D_I_by_wI_2 shape",D_L_by_w3.shape)
-    w4 = w4 - lr*D_L_by_w3
-    print("w4 shape", w4.shape)
+    a4_derv = util.derv_sigmoid(z4)
+    DL_by_z4 = DL_by_z5 @ w5.T
+    DL_by_z4 = DL_by_z4 * a4_derv #  Hadamard product/element wise multiplication here (20, 120) * (20, 120)
+    print("DL_by_z4 shape",DL_by_z4.shape) # (20, 120)
+    print("a3 shape",a3.shape)
+    #D_L_by_w4 = a3.T @ DL_by_z4 #(20,20,16).T @ (20,120) ==> (16,20,120); we need 20,120,16; need np.Transpose or below
+    D_L_by_w4=np.einsum('ijp,ik->ikp', a3, DL_by_z4) 
+    print("D_L_by_w4 shape == w4 Shape",D_L_by_w4.shape,w4.shape)
+    # Using gradient descent to update the weights
+    print("BP 4: Last weight update")
+    w4 = w4 - lr*D_L_by_w4
+    
+
+
+    # Other References
+
+    # https://e2eml.school/softmax.html
+    # https://stats.stackexchange.com/a/564725/191675
+    # https://bfeba431-a-62cb3a1a-s-sites.googlegroups.com/site/deeplearningcvpr2014/ranzato_cvpr2014_DLtutorial.pdf?attachauth=ANoY7cqPhkgQyNhJ9E7rmSk-RTdMYSYqpfJU2gPlb9cWH_4a1MbiYPq_0ihyuolPiYDkImyr9PmA-QwSuS8F3OMChiF97XTDD_luJqam70GvAC4X6G6KlU2r7Pv1rqkHaMbmXpdtXJHAveR_jWf1my_IojxFact87u2-1YXtfJIwYkhBwhMsYagICk-P6X9ktA0Pyjd601tboSlX_UGftX1vB57-tS6bdAkukhmSRLU-ZiF4RdJ_sI3YAGaaPYj1KLWFpkFa_-XG&attredirects=1
+    # https://cs.nyu.edu/~yann/talks/lecun-ranzato-icml2013.pdf
