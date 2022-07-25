@@ -26,7 +26,7 @@ def initializeWeights(number_of_filters,filter_size,depth):
         weight_layer.append(weight)
     return weight_layer
 
-def layerConvolutionActivation(image, filter_size,number_of_filters,weight_layer1):
+def layerConvolutionActivation(image, weight_layer1):
     """This function  does the Convolution with the filter and then applies the
     activation function to the convolution 
     :return: the output layer after applying the Activation
@@ -71,24 +71,28 @@ if __name__ == '__main__':
     number_of_filters = 6
     # Initialize the weight's/filters of Layer1
     w1 = initializeWeights(number_of_filters,filter_size,image.shape[2])
-    a1 = layerConvolutionActivation(image, filter_size,number_of_filters,w1)
-    
+    a1 = layerConvolutionActivation(image,w1)
+    print("w1.len =", len(w1))
+    print("w1[0].shape =", w1[0].shape)
      # For layer 2
     filter_size = 5  
     number_of_filters = 1
     # Initialize the weight's/filters of Layer1
     w2 =  initializeWeights(number_of_filters,filter_size,a1.shape[2])
     # Do convolution and activation
-    a2 = layerConvolutionActivation(a1, filter_size,number_of_filters,w2)
-    
+    a2 = layerConvolutionActivation(a1,w2)
+    print("w2.len =", len(w2))
+    print("w2[0].shape =", w2[0].shape)
     # For layer 3
     # Out=W−F+1 imagesize - filtersize + 1
     filter_size = 5  
     number_of_filters = 16
     # Initialize the weight's/filters of Layer1
     w3 =  initializeWeights(number_of_filters,filter_size,a2.shape[2])
+    print("w3.len =", len(w3))
+    print("w3[0].shape =", w3[0].shape)
     # Do convolution and activation
-    a3 = layerConvolutionActivation(a2, filter_size,number_of_filters,w3)
+    a3 = layerConvolutionActivation(a2,w3)
     print("a3.shape=", a3.shape) # output_layer3 shape = (20, 20, 16)
         
     """ 
